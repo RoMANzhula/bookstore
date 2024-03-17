@@ -1,80 +1,52 @@
 package org.romanzhula.bookstore.services.implementations;
 
-import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.IterableUtils;
 import org.romanzhula.bookstore.dto.BookDTO;
+import org.romanzhula.bookstore.mappers.BookMapper;
+import org.romanzhula.bookstore.repositories.BookRepository;
 import org.romanzhula.bookstore.services.BookService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
-    private List<BookDTO> bookDTOList = new ArrayList<>();
+    private final BookRepository bookRepository;
 
     @Override
     public List<BookDTO> getBooks() {
-        return bookDTOList;
-    }
-
-    @Override
-    public Optional<BookDTO> getBook(Long id) {
-        return bookDTOList.stream()
-                .filter(el -> el.getId().equals(id))
-                .findFirst();
-    }
-
-    @Override
-    public void save(BookDTO bookDTO) {
-        if (getBook(bookDTO.getId()).isEmpty()) {
-            bookDTOList.add(bookDTO);
-        }
-    }
-
-    @Override
-    public void update(BookDTO bookDTO) {
-        bookDTOList = bookDTOList.stream()
-                .map(existingBook -> existingBook
-                        .getId().equals(bookDTO.getId()) ? bookDTO : existingBook
-                )
+        var books = IterableUtils.toList(bookRepository.findAll());
+        return books.stream()
+                .map(BookMapper.INSTANCE::toDTO)
                 .toList();
     }
 
     @Override
-    public void delete(Long id) {
-        bookDTOList.removeIf(el -> el.getId().equals(id)); //remove only if this book was in list
+    public Optional<BookDTO> getBook(Long id) {
+        var book = bookRepository.findById(id);
+        return book.map(BookMapper.INSTANCE::toDTO);
     }
 
-    @PostConstruct
-    public void initBookDTOList() {
-        bookDTOList.addAll(
-                List.of(
-                        BookDTO.builder()
-                                .id(1L)
-                                .name("Book_1")
-                                .author("Author_1")
-                                .description("Book_1 about a good weather.")
-                                .price(277.44)
-                                .build(),
+    @Override
+    public void save(BookDTO bookDTO) {
+        bookRepository.save(BookMapper.INSTANCE.toModel(bookDTO));
+    }
 
-                        BookDTO.builder()
-                                .id(2L)
-                                .name("Book_2")
-                                .author("Author_2")
-                                .description("Book_2 about great people.")
-                                .price(214.74)
-                                .build(),
+    @Override
+    public void update(BookDTO bookDTO) {
+        if (bookRepository.findById(bookDTO.getId()).isPresent()) {
+            bookRepository.save(BookMapper.INSTANCE.toModel(bookDTO));
+        }
+    }
 
-                        BookDTO.builder()
-                                .id(3L)
-                                .name("Book_3")
-                                .author("Author_3")
-                                .description("Book_3 about a big wood.")
-                                .price(177.57)
-                                .build()
-                )
-        );
+    @Override
+    public void delete(Long id) {
+        if (bookRepository.findById(id).isPresent()) {
+            bookRepository.deleteById(id);
+        }
     }
 
 }
