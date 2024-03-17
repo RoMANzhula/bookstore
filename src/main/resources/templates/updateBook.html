@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Book Page</title>
+</head>
+<body>
+    <form th:action="@{/book/update/{id}(id=${bookToUpdate.getId()})}" th:object="${bookDTO}" method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" th:field="*{name}">
+        <label for="author">Author:</label>
+        <input type="text" id="author" th:field="*{author}">
+        <label for="description">Description:</label>
+        <input type="text" id="description" th:field="*{description}">
+        <label for="price">Price:</label>
+        <input type="number" id="price" th:field="*{price}">
+
+        <input type="submit" value="Update">
+    </form>
+</body>
+</html>
