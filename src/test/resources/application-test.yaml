@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:test_db
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:sql/init.sql
+      schema-locations: classpath:sql/schema.sql
+
+  jpa:
+    hibernate:
+      ddl-auto: none
